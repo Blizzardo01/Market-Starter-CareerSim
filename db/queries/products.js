@@ -1,6 +1,6 @@
 import db from "#db/client";
 
-export async function create_product_by_orderid(order_id, product) {
+export async function create_product(product) {
     const { title, description, price } = product;
     const sql = `
     INSERT INTO products (title, description, price)
@@ -9,5 +9,5 @@ export async function create_product_by_orderid(order_id, product) {
     `;
 
     const response = await db.query(sql, [title, description, price]);
-    return response;
+    return response.rows[0];
 }

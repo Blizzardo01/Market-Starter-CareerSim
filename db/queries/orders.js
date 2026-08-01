@@ -9,5 +9,5 @@ export async function create_order_for_user(order) {
     `;
 
     const response = await db.query(sql, [date, note, user_id]);
-    return response;
+    return response.rows[0];
 }
