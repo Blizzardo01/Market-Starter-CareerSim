@@ -1,6 +1,6 @@
 import db from "#db/client";
 
-export async function createUser({ username, password }) {
+export async function create_user({ username, password }) {
   const sql = `
     INSERT INTO users (username, password)
     VALUES ($1, $2)
@@ -11,7 +11,7 @@ export async function createUser({ username, password }) {
   return rows[0];
 }
 
-export async function getUserByUsername(username) {
+export async function get_user_by_username(username) {
   const sql = `
     SELECT *
     FROM users
@@ -22,7 +22,7 @@ export async function getUserByUsername(username) {
   return rows[0];
 }
 
-export async function getUserById(id) {
+export async function get_user_by_id(id) {
   const sql = `
     SELECT id, username
     FROM users

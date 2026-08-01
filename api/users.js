@@ -2,21 +2,21 @@ import express from "express";
 import bcrypt from "bcrypt";
 import requireBody from "#middleware/requireBody";
 import {
-  createUser,
-  getUserByUsername,
+  create_user,
+  get_user_by_username,
 } from "#db/queries/users";
 import { createToken } from "#utils/jwt";
 
-const router = express.Router();
+const usersRouter = express.Router();
 
-router.post(
+usersRouter.post(
   "/register",
   requireBody(["username", "password"]),
   async (req, res, next) => {
     try {
       const { username, password } = req.body;
 
-      const existingUser = await getUserByUsername(username);
+      const existingUser = await get_user_by_username(username);
 
       if (existingUser) {
         return res.status(400).send("Username already exists.");
@@ -24,12 +24,15 @@ router.post(
 
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      const user = await createUser({
+      const user = await create_user({
         username,
         password: hashedPassword,
       });
 
-      const token = createToken(user);
+      const token = createToken({
+        id: user.id,
+        username: user.username,
+      });
 
       res.send({ token });
     } catch (error) {
@@ -38,15 +41,14 @@ router.post(
   }
 );
 
-
-router.post(
+usersRouter.post(
   "/login",
   requireBody(["username", "password"]),
   async (req, res, next) => {
     try {
       const { username, password } = req.body;
 
-      const user = await getUserByUsername(username);
+      const user = await get_user_by_username(username);
 
       if (!user) {
         return res.status(401).send("Invalid credentials.");
@@ -61,7 +63,10 @@ router.post(
         return res.status(401).send("Invalid credentials.");
       }
 
-      const token = createToken(user);
+      const token = createToken({
+        id: user.id,
+        username: user.username,
+      });
 
       res.send({ token });
     } catch (error) {
@@ -70,4 +75,4 @@ router.post(
   }
 );
 
-export default router;
+export default usersRouter;

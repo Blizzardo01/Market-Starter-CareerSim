@@ -1,8 +1,9 @@
 import db from "#db/client";
-import { create_user } from "./queries/users.js";
-import { create_order_for_user } from "./queries/orders.js";
-import { create_product } from "./queries/products.js";
-import { create_orders_products } from "./queries/orders_products.js";
+import bcrypt from "bcrypt";
+import { create_user } from "#db/queries/users";
+import { create_order_for_user } from "#db/queries/orders";
+import { create_product } from "#db/queries/products";
+import { create_orders_products } from "#db/queries/orders_products";
 
 await db.connect();
 await seed();
@@ -11,31 +12,37 @@ await db.end();
 console.log("🌱 Database seeded.");
 
 async function seed() {
-  // Users
+  await db.query(`
+    TRUNCATE TABLE
+      orders_products,
+      orders,
+      products,
+      users
+    RESTART IDENTITY CASCADE;
+  `);
+
   const user1 = await create_user({
     username: "johnothanisthebest007",
-    password: "qwer1234",
+    password: await bcrypt.hash("qwer1234", 10),
   });
 
   const user2 = await create_user({
     username: "jaketheshake",
-    password: "rewq4321",
+    password: await bcrypt.hash("rewq4321", 10),
   });
 
-  // Orders
   const newOrder = await create_order_for_user({
     date: "2006-02-24",
     note: "order for the king",
     user_id: user1.id,
   });
 
-  const newOrder2 = await create_order_for_user({
+  await create_order_for_user({
     date: "2018-08-28",
     note: "order for bday",
     user_id: user2.id,
   });
 
-  // Products
   const newProduct1 = await create_product({
     title: "Sword of Grayskull",
     description: "I have the power!",
@@ -96,7 +103,6 @@ async function seed() {
     price: 100000,
   });
 
-  // Add 5 distinct products to the first order
   await create_orders_products({
     order_id: newOrder.id,
     product_id: newProduct1.id,
