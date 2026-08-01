@@ -34,7 +34,7 @@ usersRouter.post(
         username: user.username,
       });
 
-      res.send({ token });
+      res.status(201).send({ token });
     } catch (error) {
       next(error);
     }

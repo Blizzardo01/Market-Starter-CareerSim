@@ -1,5 +1,5 @@
+import { verifyToken } from "../utils/jwt.js";
 import { get_user_by_id } from "#db/queries/users";
-import { verifyToken } from "#utils/jwt";
 
 export default async function getUserFromToken(req, res, next) {
   const authorization = req.get("authorization");
@@ -8,17 +8,17 @@ export default async function getUserFromToken(req, res, next) {
     return next();
   }
 
-  const token = authorization.split(" ")[1];
+  const token = JSON.parse(authorization.split(" ")[1]).token;
 
   try {
-    const { id } = verifyToken(token);
-    const user = await get_user_by_id(id);
+    const payload = verifyToken(token);
+
+    const user = await get_user_by_id(payload.id);
 
     req.user = user;
 
     next();
-  } catch (e) {
-    console.error(e);
-    res.status(401).send("Invalid token.");
+  } catch (error) {
+    next();
   }
 }
